@@ -24,24 +24,6 @@ This repository contains a demo implementation of a Kubernetes admission webhook
 git clone https://github.com/rogertob/eks-webhook-demo.git
 cd eks-webhook-demo
 ```
-### 2. Set environment variables
-```bash
-export aws_region=""
-export aws_account=""
-export ecr_repo_name="webhook-demo"
-export container_image="${aws_account}.dkr.ecr.${aws_region}.amazonaws.com/${ecr_repo_name}:latest"
-```
-### 1. Build and push Docker image to ECR
-```bash
-# Login into ECR
-aws ecr get-login-password --region ${aws_region} | docker login --username AWS --password-stdin ${aws_account}.dkr.ecr.${aws_region}.amazonaws.com
-# Build image
-docker build -t webhook-demo .
-# Tag image
-docker tag ${ecr_repo_name}:latest ${aws_account}.dkr.ecr.${aws_region}.amazonaws.com/${ecr_repo_name}:latest
-# Push image 
-docker push ${aws_account}.dkr.ecr.${aws_region}.amazonaws.com/${ecr_repo_name}:latest
-```
 
 ### 2. Create the certificate issuer and certificate
 ```bash
@@ -60,7 +42,7 @@ kubectl patch validatingwebhookconfiguration pod-policy-webhook --type='json' -p
     
 ### 5. Deploy webhook
 ```bash
-envsubst < k8s/deployment/deployment.yaml | kubectl apply -f -
+kubectl apply -f k8s/deployment/
 ```
 
     

@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: ${container_image}
+        image: rogertob/webhook-demo:latest
         command: ["/usr/local/bin/webhook"]
         ports:
         - containerPort: 8443
