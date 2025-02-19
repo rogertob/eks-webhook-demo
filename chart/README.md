@@ -19,7 +19,7 @@ This Helm chart deploys a Kubernetes admission webhook demo that validates pod c
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/rogertob/webhook-demo
+git clone https://github.com/rogertob/eks-webhook-demo.git
 cd webhook-demo/chart
 ```
 
