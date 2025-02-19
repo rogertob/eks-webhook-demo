@@ -1,0 +1,39 @@
+fullnameOverride: "webhook-demo"
+
+replicaCount: 1
+
+image:
+  repository: rogertob/webhook-demo #123456789.dkr.ecr.us-east-1.amazonaws.com/webhook-demo
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: webhook-service
+  port: 443
+
+deployment:
+  containerPort: 8443
+
+webhookConfiguration:
+  name: pod-policy-webhook
+  serviceName: webhook-service
+  serviceNamespace: default
+  path: /validate
+  sideEffects: None
+  admissionReviewVersions:
+    - v1
+  failurePolicy: Ignore
+  timeoutSeconds: 10
+  caBundle: ""
+  namespaceSelector:
+    matchLabels:
+      #monitored: "true"
+
+# cert-manager related values (if needed)
+cert:
+  certificateName: webhook-cert
+  dnsNames:
+    - "{{ .Values.webhookConfiguration.serviceName }}.{{ .Values.webhookConfiguration.serviceNamespace }}.svc"
+  issuerName: selfsigned-cluster-issuer
+
+  

@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "webhook-demo.fullname" . }}-patch-webhook-ca
+  labels:
+    admission-webhook: ignore
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  activeDeadlineSeconds: 300
+  template:
+    metadata:
+      labels:
+        admission-webhook: ignore
+    spec:
+      serviceAccountName: patch-webhook-sa  # Use the dedicated SA
+      restartPolicy: Never
+      containers:
+        - name: patch-webhook-ca
+          image: bitnami/kubectl:1.26.2
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              # Wait for cert-manager to create the secret (retry up to 10 times)
+              for i in $(seq 1 10); do
+                CA_BUNDLE=$(kubectl get secret {{ .Values.cert.secretName | default "webhook-tls" }} -n {{ .Release.Namespace }} -o jsonpath='{.data.ca\.crt}' 2>/dev/null || true)
+                if [ -z "$CA_BUNDLE" ]; then
+                  echo "ca.crt not found, trying tls.crt..."
+                  CA_BUNDLE=$(kubectl get secret {{ .Values.cert.secretName | default "webhook-tls" }} -n {{ .Release.Namespace }} -o jsonpath='{.data.tls\.crt}' 2>/dev/null || true)
+                fi
+                if [ -n "$CA_BUNDLE" ]; then
+                  break
+                fi
+                echo "Waiting for CA bundle in secret..."
+                sleep 5
+              done
+              if [ -z "$CA_BUNDLE" ]; then
+                echo "Error: CA bundle not found. Exiting."
+                exit 1
+              fi
+              echo "Patching ValidatingWebhookConfiguration with CA bundle..."
+              kubectl patch validatingwebhookconfiguration {{ .Values.webhookConfiguration.name }} \
+                --type='json' \
+                -p='[{"op": "replace", "path": "/webhooks/0/clientConfig/caBundle", "value": "'"${CA_BUNDLE}"'"}]'

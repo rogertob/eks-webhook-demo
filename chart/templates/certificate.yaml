@@ -1,0 +1,27 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ .Values.cert.certificateName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: webhook-tls
+  dnsNames:
+    - {{ .Values.webhookConfiguration.serviceName }}.{{ .Values.webhookConfiguration.serviceNamespace }}.svc
+  issuerRef:
+    name: {{ .Values.cert.issuerName }}
+    kind: ClusterIssuer
+
+
+
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: webhook-cert
+  namespace: default
+spec:
+  secretName: webhook-tls  # This secret will hold the TLS cert and key
+  dnsNames:
+  - webhook-service.default.svc
+  issuerRef:
+    name: selfsigned-cluster-issuer
+    kind: ClusterIssuer

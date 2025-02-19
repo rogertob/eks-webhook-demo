@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-server
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-server
+  template:
+    metadata:
+      labels:
+        app: webhook-server
+    spec:
+      containers:
+      - name: server
+        image: ${container_image}
+        command: ["/usr/local/bin/webhook"]
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - name: webhook-tls
+          mountPath: /etc/webhook
+          readOnly: true
+
+      volumes:
+      - name: webhook-tls
+        secret:
+          secretName: webhook-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  namespace: default
+spec:
+  selector:
+    app: webhook-server
+  ports:
+  - port: 443
+    targetPort: 8443
+
+          

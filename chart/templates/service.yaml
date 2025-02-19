@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.webhookConfiguration.serviceName }}
+  namespace: {{ .Values.webhookConfiguration.serviceNamespace }}
+spec:
+  selector:
+    app: {{ include "webhook-demo.name" . }}
+  ports:
+  - port: {{ .Values.service.port }}
+    targetPort: {{ .Values.deployment.containerPort }}

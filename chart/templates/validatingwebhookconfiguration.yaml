@@ -1,0 +1,30 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: {{ .Values.webhookConfiguration.name }}
+webhooks:
+- name: pod-policy.example.com
+  sideEffects: {{ .Values.webhookConfiguration.sideEffects }}
+  admissionReviewVersions: {{ toJson .Values.webhookConfiguration.admissionReviewVersions }}
+  clientConfig:
+    service:
+      name: {{ .Values.webhookConfiguration.serviceName }}
+      namespace: {{ .Values.webhookConfiguration.serviceNamespace }}
+      path: "{{ .Values.webhookConfiguration.path }}"
+    caBundle: {{ .Values.webhookConfiguration.caBundle | quote }}
+  {{- if .Values.webhookConfiguration.namespaceSelector }}
+  namespaceSelector:
+{{ toYaml .Values.webhookConfiguration.namespaceSelector | nindent 4 }}
+  {{- end }}
+  rules:
+  - apiGroups: [""]
+    apiVersions: ["v1"]
+    operations: ["CREATE"]
+    resources: ["pods"]
+  failurePolicy: {{ .Values.webhookConfiguration.failurePolicy }}
+  timeoutSeconds: {{ .Values.webhookConfiguration.timeoutSeconds }}
+  objectSelector:
+    matchExpressions:
+      - key: admission-webhook
+        operator: NotIn
+        values: ["ignore"]

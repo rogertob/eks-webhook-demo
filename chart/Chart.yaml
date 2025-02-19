@@ -1,0 +1,5 @@
+apiVersion: v2
+name: webhook-demo
+description: A demo Kubernetes admission webhook that validates pod creation by enforcing required labels.
+version: 0.1.0
+appVersion: "1.0"
