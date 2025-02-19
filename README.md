@@ -22,7 +22,7 @@ This repository contains a demo implementation of a Kubernetes admission webhook
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/rogertob/eks-webhook-demo.git
-cd webhook-demo
+cd eks-webhook-demo
 ```
 ### 2. Set environment variables
 ```bash
